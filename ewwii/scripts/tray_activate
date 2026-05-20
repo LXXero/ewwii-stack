@@ -1,0 +1,6 @@
+#!/bin/sh
+# tray_activate <rank>     left-click → Default activate on the Nth tray
+N=$1
+id=$(sed -n "${N}p" /tmp/ewwii_tray.list 2>/dev/null | cut -f1)
+[ -z "$id" ] && exit 0
+exec $HOME/.local/bin/wlr-tray activate "$id"

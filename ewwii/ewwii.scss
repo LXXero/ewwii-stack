@@ -1,0 +1,219 @@
+// tokyonight palette
+$bg:       #1a1b26;
+$bg-alt:   #24283b;
+$fg:       #c0caf5;
+$grey:     #565f89;
+$blue:     #7aa2f7;
+$cyan:     #7dcfff;
+$green:    #9ece6a;
+$yellow:   #e0af68;
+$red:      #f7768e;
+$magenta:  #bb9af7;
+
+* {
+  all: unset;
+  font-family: "FiraCode Nerd Font Mono";
+  font-size: 12px;
+}
+
+.bar {
+  background-color: rgba(26, 27, 38, 0.86);
+  color: $fg;
+  padding: 8px 6px;
+}
+
+.rule {
+  background-color: rgba(86, 95, 137, 0.4);
+  min-height: 1px;
+  margin: 2px 4px;
+}
+
+// clock
+.clock        { color: $fg; padding: 2px 0 4px 0; }
+.clock-hour   { color: $blue; font-weight: bold; font-size: 18px; }
+.clock-sep    { color: $blue; font-weight: bold; font-size: 18px; }
+.clock-min    { color: $blue; font-weight: bold; font-size: 18px; }
+.clock-day    { color: $fg;   font-size: 14px; }
+.clock-mon    { color: $grey; font-size: 14px; }
+
+// metric labels
+.metric-label   { color: $blue;   font-weight: bold; font-size: 12px; }
+.metric-val     { color: $green;  font-size: 12px; }
+.metric-sub     { color: $grey;   font-size: 11px; }
+.metric-sub-hot { color: $yellow; font-size: 11px; }
+
+// graphs
+graph {
+  background-color: rgba(36, 40, 59, 0.6);
+  border-radius: 2px;
+  padding: 1px;
+}
+.g-cpu     { color: $green; }
+.g-mem     { color: $magenta; }
+.g-disk-rd { color: $cyan; }
+.g-disk-wr { color: $yellow; }
+.g-net-dn  { color: $cyan; }
+.g-net-up  { color: $yellow; }
+
+// temp bars (progress widget)
+.t-bar {
+  min-width: 56px; min-height: 5px;
+  trough {
+    min-width: 56px; min-height: 5px;
+    background-color: $bg-alt;
+    border-radius: 2px;
+  }
+  progress {
+    min-height: 5px;
+    background-color: $yellow;
+    border-radius: 2px;
+  }
+}
+
+// battery bar
+.bat-bar {
+  min-width: 134px; min-height: 6px;
+  trough {
+    min-width: 134px; min-height: 6px;
+    background-color: $bg-alt;
+    border-radius: 2px;
+  }
+  progress {
+    min-height: 6px;
+    background-color: $green;
+    border-radius: 2px;
+  }
+}
+
+// icons
+.icon, .icon * {
+  font-family: "FiraCode Nerd Font Mono";
+  font-size: 26px;
+}
+.icon {
+  color: $fg;
+  padding: 1px;
+  min-width: 26px;
+  min-height: 26px;
+}
+button.icon, button.icon label {
+  font-size: 26px;
+}
+.icon:hover, .icon:hover * { color: $blue; }
+
+// thin level bar under volume/brightness icons
+.ctl-bar {
+  min-width: 30px; min-height: 3px;
+  trough    { min-width: 30px; min-height: 3px; background-color: $bg-alt;
+              border-radius: 1px; }
+  progress  { min-height: 3px; border-radius: 1px; }
+}
+.ctl-vol progress { background-color: $green; }
+.ctl-bri progress { background-color: $yellow; }
+
+.vol-icon  { color: $green; }
+.vol-muted { color: $red; }
+.vol-bar {
+  min-width: 6px;
+  min-height: 80px;
+  trough    { background: $bg-alt; border-radius: 3px; min-width: 6px; }
+  highlight { background: $green;  border-radius: 3px; }
+  slider    { background: transparent; min-width: 0; min-height: 0; }
+}
+
+.bri-icon { color: $yellow; }
+.bri-bar {
+  min-width: 6px;
+  min-height: 80px;
+  trough    { background: $bg-alt; border-radius: 3px; min-width: 6px; }
+  highlight { background: $yellow; border-radius: 3px; }
+  slider    { background: transparent; min-width: 0; min-height: 0; }
+}
+
+.wifi-icon { color: $cyan; }
+
+// tray
+.tray-item {
+  padding: 2px 4px;
+  border-radius: 2px;
+}
+.tray-item:hover {
+  background-color: $bg-alt;
+}
+
+// tray right-click menu popup
+.tray-menu {
+  background-color: rgba(26, 27, 38, 0.96);
+  border: 1px solid $bg-alt;
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 200px;
+}
+.menu-item {
+  padding: 5px 12px;
+}
+.menu-item:hover {
+  background-color: $bg-alt;
+}
+.menu-item .menu-label { color: $fg; }
+.menu-item:hover .menu-label { color: $blue; }
+.menu-disabled .menu-label { color: $grey; }
+.menu-disabled:hover { background-color: transparent; }
+.menu-sep {
+  background-color: rgba(86, 95, 137, 0.4);
+  min-height: 1px;
+  margin: 4px 8px;
+}
+.menu-empty { min-height: 0; }
+
+// taskbar
+.tb-item {
+  font-family: "FiraCode Nerd Font Mono";
+  font-size: 9px;
+  color: $fg;
+  background-color: rgba(36, 40, 59, 0.5);
+  border-radius: 2px;
+  padding: 2px 4px;
+  margin: 0 2px;
+}
+.tb-item:hover {
+  background-color: $bg-alt;
+  color: $blue;
+}
+.tb-focused {
+  background-color: $blue;
+  color: $bg;
+  font-weight: bold;
+}
+.tb-focused:hover {
+  background-color: $cyan;
+  color: $bg;
+}
+.tb-minimized {
+  background-color: rgba(86, 95, 137, 0.15);
+  border-left: 2px solid $grey;
+}
+.tb-minimized label {
+  color: $grey;
+  font-family: "JetBrains Mono";
+  font-style: italic;
+}
+.tb-minimized:hover {
+  background-color: $bg-alt;
+}
+.tb-minimized:hover label {
+  color: $fg;
+  font-family: "JetBrains Mono";
+  font-style: italic;
+}
+.tb-title {
+  font-size: 11px;
+}
+
+.bat-icon { color: $green; font-size: 14px; padding: 0; min-width: 0; min-height: 0; }
+
+.pwr-icon     { color: $red; }
+.pwr-lock     { color: $blue; }
+.pwr-logout   { color: $yellow; }
+.pwr-reboot   { color: $magenta; }
+.pwr-shutdown { color: $red; }

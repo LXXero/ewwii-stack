@@ -1,0 +1,8 @@
+#!/bin/sh
+# top_val <metric> <rank>     -> just the percentage (one decimal)
+case "$1" in
+  cpu) sort='-%cpu'; field='%cpu' ;;
+  mem) sort='-%mem'; field='%mem' ;;
+  *)   exit 0 ;;
+esac
+ps -eo $field --no-headers --sort=$sort | sed -n "${2}p" | awk '{printf "%.1f\n", $1}'

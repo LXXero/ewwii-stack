@@ -1,0 +1,13 @@
+#!/bin/sh
+if wpctl get-volume @DEFAULT_AUDIO_SINK@ | grep -q MUTED; then
+  printf '\xef\x80\xa6\n'   # U+F026  volume-off (mute)
+else
+  v=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2*100)}')
+  if [ "$v" -ge 50 ]; then
+    printf '\xef\x80\xa8\n' # U+F028  volume-up
+  elif [ "$v" -gt 0 ]; then
+    printf '\xef\x80\xa7\n' # U+F027  volume-down
+  else
+    printf '\xef\x80\xa6\n' # U+F026  volume-off
+  fi
+fi

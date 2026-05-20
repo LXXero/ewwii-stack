@@ -1,0 +1,13 @@
+#!/bin/sh
+# top_proc <metric> <rank>     metric=cpu|mem  rank=1..5
+# Outputs: "proc_name X.X"  (used by both name and value labels via cut)
+case "$1" in
+  cpu) sort='-%cpu'; field='%cpu' ;;
+  mem) sort='-%mem'; field='%mem' ;;
+  *)   exit 0 ;;
+esac
+ps -eo comm,$field --no-headers --sort=$sort | sed -n "${2}p" | awk '{
+  name=$1; gsub(/^.*\//,"",name)
+  if (length(name) > 10) name=substr(name,1,10)
+  printf "%-10s %s\n", name, $2
+}'

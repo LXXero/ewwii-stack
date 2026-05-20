@@ -1,0 +1,36 @@
+#!/bin/sh
+# task_slot <rank> <field>     field: exists | id | app_id | title | focused
+# Reads from /tmp/ewwii_wlrctl.list (wlr-taskd-fed cache).
+# Cache lines are TAB-separated: id<TAB>app_id<TAB>title<TAB>state
+N=$1
+F=$2
+line=$(sed -n "${N}p" /tmp/ewwii_wlrctl.list 2>/dev/null)
+case "$F" in
+  exists)
+    [ -n "$line" ] && echo true || echo false
+    ;;
+  id)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f1
+    ;;
+  app_id)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f2
+    ;;
+  title)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f3 | awk '{
+      if (length($0) > 16) print substr($0, 1, 14) ".."
+      else print
+    }'
+    ;;
+  focused)
+    [ -z "$line" ] && { echo "tb-item"; exit; }
+    state=$(printf '%s\n' "$line" | cut -f4)
+    case "$state" in
+      F) echo "tb-item tb-focused" ;;
+      M) echo "tb-item tb-minimized" ;;
+      *) echo "tb-item" ;;
+    esac
+    ;;
+esac

@@ -1,0 +1,10 @@
+#!/bin/sh
+# top_name <metric> <rank>     -> just the process name
+case "$1" in
+  cpu) sort='-%cpu' ;;
+  mem) sort='-%mem' ;;
+  *)   exit 0 ;;
+esac
+ps -eo comm --no-headers --sort=$sort | sed -n "${2}p" | awk '{
+  n=$1; if (length(n) > 11) n=substr(n,1,11); print n
+}'

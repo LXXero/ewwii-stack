@@ -1,0 +1,9 @@
+#!/bin/sh
+# Snippet to add to ~/.config/labwc/autostart
+# Order matters: daemons before ewwii so the bar finds populated state immediately.
+
+~/.local/bin/wlr-taskd >/dev/null 2>&1 &
+~/.local/bin/wlr-trayd >/dev/null 2>&1 &
+
+ewwii daemon >/dev/null 2>&1 &
+sleep 1 && ewwii open bar &

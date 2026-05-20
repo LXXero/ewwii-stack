@@ -1,0 +1,12 @@
+#!/bin/sh
+# minimize_slot <rank> — toggle minimize on the toplevel at rank N
+N=$1
+line=$(sed -n "${N}p" /tmp/ewwii_wlrctl.list 2>/dev/null)
+[ -z "$line" ] && exit 0
+id=$(printf '%s\n' "$line" | cut -f1)
+state=$(printf '%s\n' "$line" | cut -f4)
+if [ "$state" = "M" ]; then
+  exec $HOME/.local/bin/wlr-task unminimize "$id"
+else
+  exec $HOME/.local/bin/wlr-task minimize "$id"
+fi

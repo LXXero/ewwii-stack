@@ -1,0 +1,11 @@
+# build artifacts
+wlr-taskd/wlr-ftm-protocol.h
+wlr-taskd/wlr-ftm-protocol.c
+wlr-trayd/target/
+**/*.o
+
+# editor crud
+*.swp
+*~
+.idea/
+.vscode/

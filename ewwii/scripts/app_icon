@@ -1,0 +1,65 @@
+#!/bin/sh
+# app_icon <app_id>     -> absolute path to a PNG/SVG icon (or empty)
+APP_ID=$1
+[ -z "$APP_ID" ] && exit 0
+
+CACHE=/tmp/ewwii_appicon_cache
+mkdir -p "$CACHE"
+CACHED="$CACHE/$APP_ID"
+[ -f "$CACHED" ] && { cat "$CACHED"; exit 0; }
+
+# 1) Find .desktop file matching app_id.
+# Prefer exact / well-known-variation matches across ALL dirs before
+# falling back to fuzzy contains-match (otherwise something like
+# "claude-code-url-handler.desktop" can shadow "claude.desktop").
+desktop=""
+DIRS="$HOME/.local/share/applications /usr/share/applications /usr/local/share/applications"
+# Pass A: exact and common variations
+for dir in $DIRS; do
+  [ -d "$dir" ] || continue
+  for cand in "$dir/$APP_ID.desktop" \
+              "$dir/${APP_ID}-desktop.desktop" \
+              "$dir/${APP_ID}.app.desktop"; do
+    if [ -f "$cand" ]; then desktop=$cand; break 2; fi
+  done
+done
+# Pass B: case-insensitive prefix match (foo.desktop, foo-bar.desktop)
+if [ -z "$desktop" ]; then
+  for dir in $DIRS; do
+    [ -d "$dir" ] || continue
+    found=$(find "$dir" -maxdepth 1 -iname "${APP_ID}.desktop" 2>/dev/null | head -1)
+    [ -n "$found" ] && { desktop=$found; break; }
+  done
+fi
+# Pass C: last-resort contains match
+if [ -z "$desktop" ]; then
+  for dir in $DIRS; do
+    [ -d "$dir" ] || continue
+    found=$(find "$dir" -maxdepth 1 -iname "*${APP_ID}*.desktop" 2>/dev/null | head -1)
+    [ -n "$found" ] && { desktop=$found; break; }
+  done
+fi
+[ -z "$desktop" ] && { : > "$CACHED"; exit 0; }
+
+icon=$(awk -F= 'tolower($1)=="icon"{print $2; exit}' "$desktop")
+[ -z "$icon" ] && { : > "$CACHED"; exit 0; }
+
+# 2) If already an absolute path, use as-is
+if [ "${icon#/}" != "$icon" ] && [ -f "$icon" ]; then
+  printf '%s\n' "$icon" | tee "$CACHED"
+  exit 0
+fi
+
+# 3) Resolve by name via icon-theme search (largest available)
+for base in "$HOME/.local/share/icons" /usr/share/icons /usr/share/pixmaps; do
+  [ -d "$base" ] || continue
+  match=$(find "$base" \( -name "${icon}.png" -o -name "${icon}.svg" \) 2>/dev/null \
+          | awk -F/ '{
+              for (i=1;i<=NF;i++) if ($i ~ /^[0-9]+x[0-9]+$/) { split($i,a,"x"); size=a[1]+0; break }
+              print size"\t"$0
+            }' \
+          | sort -rn | head -1 | cut -f2-)
+  [ -n "$match" ] && { printf '%s\n' "$match" | tee "$CACHED"; exit 0; }
+done
+
+: > "$CACHED"

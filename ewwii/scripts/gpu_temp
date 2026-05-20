@@ -1,0 +1,7 @@
+#!/bin/sh
+for h in /sys/class/hwmon/hwmon*; do
+  if [ "$(cat "$h/name" 2>/dev/null)" = "amdgpu" ]; then
+    echo $(( $(cat "$h/temp1_input") / 1000 )) && exit
+  fi
+done
+echo 0

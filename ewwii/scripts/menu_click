@@ -1,0 +1,13 @@
+#!/bin/sh
+# menu_click <rank> — dispatch the Nth menu item's click via daemon, then close
+N=$1
+tray_id=$(cat /tmp/ewwii_tray_current 2>/dev/null)
+menu_id=$(sed -n "${N}p" /tmp/ewwii_menu.list 2>/dev/null | cut -f1)
+sep=$(sed -n "${N}p" /tmp/ewwii_menu.list 2>/dev/null | cut -f5)
+[ -z "$tray_id" ] && exit 0
+[ -z "$menu_id" ] && exit 0
+[ "$sep" = "1" ] && exit 0   # separators do nothing
+
+$HOME/.local/bin/wlr-tray menu-click "$tray_id" "$menu_id"
+ewwii close tray_menu 2>/dev/null
+: > /tmp/ewwii_tray_current

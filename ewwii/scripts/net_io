@@ -1,0 +1,14 @@
+#!/bin/sh
+# net IO in KB/s; arg: "rx" or "tx"
+IF=wlan0
+STATE=/tmp/ewwii_net_$1
+F=/sys/class/net/$IF/statistics/${1}_bytes
+[ -r "$F" ] || { echo 0; exit; }
+now=$(cat "$F")
+now_ns=$(date +%s%N)
+prev=$now; prev_ns=$now_ns
+[ -r "$STATE" ] && read prev prev_ns < "$STATE"
+echo "$now $now_ns" > "$STATE"
+dt_ms=$(( (now_ns - prev_ns) / 1000000 ))
+[ $dt_ms -le 0 ] && { echo 0; exit; }
+echo $(( (now - prev) / 1024 * 1000 / dt_ms ))

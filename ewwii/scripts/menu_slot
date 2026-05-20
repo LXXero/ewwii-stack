@@ -1,0 +1,41 @@
+#!/bin/sh
+# menu_slot <rank> <field>     field: exists | menu_id | label | enabled | separator | has_submenu
+N=$1
+F=$2
+line=$(sed -n "${N}p" /tmp/ewwii_menu.list 2>/dev/null)
+case "$F" in
+  exists)
+    [ -n "$line" ] && echo true || echo false
+    ;;
+  menu_id)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f1
+    ;;
+  label)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f2
+    ;;
+  enabled)
+    [ -z "$line" ] && { echo true; exit; }
+    case "$(printf '%s\n' "$line" | cut -f3)" in
+      1) echo true ;;
+      *) echo false ;;
+    esac
+    ;;
+  separator)
+    [ -z "$line" ] && { echo false; exit; }
+    case "$(printf '%s\n' "$line" | cut -f5)" in
+      1) echo true ;;
+      *) echo false ;;
+    esac
+    ;;
+  class)
+    [ -z "$line" ] && { echo "menu-empty"; exit; }
+    sep=$(printf '%s\n' "$line" | cut -f5)
+    en=$(printf '%s\n' "$line" | cut -f3)
+    if [ "$sep" = "1" ]; then echo "menu-sep"
+    elif [ "$en" = "0" ]; then echo "menu-item menu-disabled"
+    else echo "menu-item"
+    fi
+    ;;
+esac

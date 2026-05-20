@@ -1,0 +1,2 @@
+#!/bin/sh
+awk '/SwapTotal:/{t=$2} /SwapFree:/{f=$2} END{ if (t>0) printf "%d\n", (t-f)*100/t; else print 0 }' /proc/meminfo

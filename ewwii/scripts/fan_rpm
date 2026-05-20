@@ -1,0 +1,7 @@
+#!/bin/sh
+for h in /sys/class/hwmon/hwmon*; do
+  if [ "$(cat "$h/name" 2>/dev/null)" = "thinkpad" ]; then
+    cat "$h/fan1_input" 2>/dev/null && exit
+  fi
+done
+echo 0

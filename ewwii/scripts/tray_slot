@@ -1,0 +1,29 @@
+#!/bin/sh
+# tray_slot <rank> <field>     field: exists | id | title | icon | has_menu
+N=$1
+F=$2
+line=$(sed -n "${N}p" /tmp/ewwii_tray.list 2>/dev/null)
+case "$F" in
+  exists)
+    [ -n "$line" ] && echo true || echo false
+    ;;
+  id)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f1
+    ;;
+  title)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f2
+    ;;
+  icon)
+    [ -z "$line" ] && exit 0
+    printf '%s\n' "$line" | cut -f3
+    ;;
+  has_menu)
+    [ -z "$line" ] && { echo false; exit; }
+    case "$(printf '%s\n' "$line" | cut -f4)" in
+      1) echo true ;;
+      *) echo false ;;
+    esac
+    ;;
+esac

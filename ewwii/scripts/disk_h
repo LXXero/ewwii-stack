@@ -1,0 +1,2 @@
+#!/bin/sh
+df -h --output=used,size / | tail -1 | awk '{printf "%s/%s\n", $1, $2}'

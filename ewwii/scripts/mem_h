@@ -1,0 +1,11 @@
+#!/bin/sh
+# "1.2G/16G" formatted memory used/total
+awk '/MemTotal:/{t=$2} /MemAvailable:/{a=$2}
+END {
+  used=t-a
+  if (used >= 1048576) printf "%.1fG", used/1048576
+  else                 printf "%dM", used/1024
+  printf "/"
+  if (t >= 1048576) printf "%.0fG\n", t/1048576
+  else              printf "%dM\n", t/1024
+}' /proc/meminfo

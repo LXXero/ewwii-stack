@@ -1,0 +1,16 @@
+#!/bin/sh
+# Emits a JSON array of {app_id, title, state, icon} for every toplevel.
+active=$(wlrctl toplevel list state:activated 2>/dev/null | head -1)
+minimized=$(wlrctl toplevel list state:minimized 2>/dev/null)
+
+wlrctl toplevel list 2>/dev/null | while IFS= read -r line; do
+  app_id=$(printf '%s\n' "$line" | awk -F': ' '{print $1}')
+  title=$(printf '%s\n' "$line" | sed 's/^[^:]*: //')
+  if [ "$line" = "$active" ]; then state=F
+  elif printf '%s\n' "$minimized" | grep -qFx -- "$line"; then state=M
+  else state=N
+  fi
+  icon=$($HOME/.config/ewwii/scripts/app_icon "$app_id" 2>/dev/null)
+  jq -nc --arg a "$app_id" --arg t "$title" --arg s "$state" --arg i "$icon" \
+    '{app_id:$a, title:$t, state:$s, icon:$i}'
+done | jq -s -c '.'

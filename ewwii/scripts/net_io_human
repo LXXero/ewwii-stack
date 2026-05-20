@@ -1,0 +1,8 @@
+#!/bin/sh
+# pretty-print KB/s value as " 1.2M" / "234K" / "  0K"
+kbs=$1
+if [ "$kbs" -ge 1024 ]; then
+  awk -v k=$kbs 'BEGIN{printf "%.1fM\n", k/1024}'
+else
+  printf '%dK\n' "$kbs"
+fi

@@ -1,0 +1,17 @@
+#!/bin/sh
+# Nerd-Font battery glyphs via UTF-8 hex (Write-tool-safe)
+p=$(cat /sys/class/power_supply/BAT0/capacity)
+s=$(cat /sys/class/power_supply/BAT0/status)
+if [ "$s" = "Charging" ]; then
+  printf '\xef\x83\xa7\n'   # U+F0E7  lightning
+elif [ "$p" -ge 90 ]; then
+  printf '\xef\x89\x80\n'   # U+F240  battery full
+elif [ "$p" -ge 70 ]; then
+  printf '\xef\x89\x81\n'   # U+F241  battery 3/4
+elif [ "$p" -ge 40 ]; then
+  printf '\xef\x89\x82\n'   # U+F242  battery half
+elif [ "$p" -ge 15 ]; then
+  printf '\xef\x89\x83\n'   # U+F243  battery 1/4
+else
+  printf '\xef\x89\x84\n'   # U+F244  battery empty
+fi

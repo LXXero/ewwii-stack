@@ -1,0 +1,14 @@
+#!/bin/sh
+# disk IO in KB/s; arg: "rd" or "wr"; sector = 512B
+DEV=nvme0n1
+STATE=/tmp/ewwii_disk_$1
+set -- $(awk '{print $3, $7}' /sys/block/$DEV/stat) "$1"
+rd=$1; wr=$2; mode=$3
+case "$mode" in rd) now=$rd ;; wr) now=$wr ;; esac
+NOW_NS=$(date +%s%N)
+prev=0; prev_ns=$NOW_NS
+[ -r "$STATE" ] && read prev prev_ns < "$STATE"
+echo "$now $NOW_NS" > "$STATE"
+dt_ms=$(( (NOW_NS - prev_ns) / 1000000 ))
+[ $dt_ms -le 0 ] && { echo 0; exit; }
+echo $(( (now - prev) * 512 / 1024 * 1000 / dt_ms ))

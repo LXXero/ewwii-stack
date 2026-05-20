@@ -1,0 +1,21 @@
+#!/bin/sh
+S=/sys/class/power_supply/BAT0
+status=$(cat "$S/status")
+case "$status" in
+  Charging|Discharging)
+    p=$(cat "$S/power_now" 2>/dev/null)
+    e=$(cat "$S/energy_now" 2>/dev/null)
+    f=$(cat "$S/energy_full" 2>/dev/null)
+    if [ -z "$p" ] || [ "$p" -eq 0 ] 2>/dev/null; then exit; fi
+    if [ "$status" = "Charging" ]; then
+      remaining=$((f - e))
+    else
+      remaining=$e
+    fi
+    awk -v r="$remaining" -v p="$p" 'BEGIN {
+      sec = (r/p)*3600
+      h = int(sec/3600); m = int((sec%3600)/60)
+      printf "%dh %02dm\n", h, m
+    }'
+    ;;
+esac

@@ -1,0 +1,6 @@
+#!/bin/sh
+# focus_slot <rank> — focus the toplevel at rank N via wlr-taskd
+N=$1
+id=$(sed -n "${N}p" /tmp/ewwii_wlrctl.list 2>/dev/null | cut -f1)
+[ -z "$id" ] && exit 0
+exec $HOME/.local/bin/wlr-task focus "$id"

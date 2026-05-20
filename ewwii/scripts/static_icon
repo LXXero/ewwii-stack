@@ -1,0 +1,11 @@
+#!/bin/sh
+# Emits Nerd-Font glyphs by name (UTF-8 via printf hex)
+case "$1" in
+  lock)        printf '\xef\x80\xa3\n' ;;   # U+F023
+  logout)      printf '\xef\x82\x8b\n' ;;   # U+F08B
+  reboot)      printf '\xef\x80\xa1\n' ;;   # U+F021
+  shutdown)    printf '\xef\x80\x91\n' ;;   # U+F011
+  power)       printf '\xef\x80\x91\n' ;;   # U+F011
+  brightness)  printf '\xef\x86\x85\n' ;;   # U+F185
+  *) ;;
+esac

@@ -1,0 +1,6 @@
+#!/bin/sh
+if nmcli -t -f WIFI g | grep -q enabled && nmcli -t -f STATE g | grep -q connected; then
+  printf '\xef\x87\xab\n'   # U+F1EB  wifi
+else
+  printf '\xef\x9a\xac\n'   # U+F6AC  wifi-off
+fi

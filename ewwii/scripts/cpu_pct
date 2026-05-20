@@ -1,0 +1,19 @@
+#!/bin/sh
+# CPU usage % via /proc/stat diff (stateless: stores last reading in /tmp)
+STATE=/tmp/ewwii_cpu_last
+read _ u n s i io irq sirq st _ < /proc/stat
+total=$((u + n + s + i + io + irq + sirq + st))
+idle=$((i + io))
+if [ -r "$STATE" ]; then
+  read p_total p_idle < "$STATE"
+  dt=$((total - p_total))
+  di=$((idle - p_idle))
+  if [ "$dt" -gt 0 ]; then
+    printf '%d\n' $(( (100 * (dt - di)) / dt ))
+  else
+    echo 0
+  fi
+else
+  echo 0
+fi
+echo "$total $idle" > "$STATE"

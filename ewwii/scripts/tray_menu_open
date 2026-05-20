@@ -1,0 +1,20 @@
+#!/bin/sh
+# tray_menu_open <slot_rank>
+# Launches the native GTK4 popup (wlr-tray-menu) for the Nth tray.
+N=$1
+id=$(sed -n "${N}p" /tmp/ewwii_tray.list 2>/dev/null | cut -f1)
+[ -z "$id" ] && exit 0
+
+conf="${HOME}/.config/ewwii/tray_menu.env"
+[ -r "$conf" ] && . "$conf"
+export WLR_TRAY_MENU_RIGHT_MARGIN
+export WLR_TRAY_MENU_TOP_MARGIN
+export WLR_TRAY_MENU_BOTTOM_MARGIN
+
+# Keep the popup singleton-ish. Repeated right-clicks can otherwise race
+# before the full-screen dismiss layer has mapped.
+pkill -x wlr-tray-menu 2>/dev/null || true
+
+# Detach so ewwii's 200ms click-timeout doesn't kill the popup.
+setsid $HOME/.local/bin/wlr-tray-menu "$id" "$N" </dev/null >/dev/null 2>&1 &
+exit 0
