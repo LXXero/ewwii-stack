@@ -681,7 +681,7 @@ tree([
   // ---- window --------------------------------------------------------------
   defwindow("bar", #{
     monitor: 0,
-    stacking: "bg",
+    stacking: "fg",
     exclusive: true,
     geometry: #{
       x: "0px",
