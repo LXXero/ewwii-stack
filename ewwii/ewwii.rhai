@@ -242,8 +242,9 @@ fn vol() {
   return eventbox(#{
     class: icon_class,
     cursor: "pointer",
-    tooltip: "scroll to adjust · click to mute",
+    tooltip: "scroll to adjust · click to mute · right-click for mixer",
     onclick:  "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    onrightclick: "setsid -f pavucontrol >/dev/null 2>&1",
     onscroll: "[ '{}' = 'up' ] && wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
   }, [
     box(#{ orientation: "v", space_evenly: false, spacing: 1 }, [
