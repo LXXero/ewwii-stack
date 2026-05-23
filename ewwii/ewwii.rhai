@@ -12,25 +12,21 @@ fn rule() {
 // Shows when this host has a maildir (mail_status non-empty) AND no battery.
 // On laptops the battery slot wins and mail stays hidden. Icon highlights via
 // .has-mail when the unread count (mail_count) > 0.
-// Mail icon+count on the left (hidden via `visible:` when no maildir);
-// lock button pinned to the far right of the same row.
+// Centered mail icon+count; hidden via `visible:` when this host has no maildir.
 fn mail_section() {
-  return box(#{ orientation: "h", space_evenly: false, hexpand: true, spacing: 6 }, [
-    eventbox(#{
-      class: "mail-box",
-      visible: has_mail,
-      cursor: "pointer",
-      hexpand: true,
-      tooltip: "click to open mutt",
-      onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
-    }, [
-      box(#{ orientation: "h", space_evenly: false, halign: "start", spacing: 6 }, [
-        label(#{ class: "mail-icon", text: icon_mail }),
-        label(#{ class: mail_class,  text: mail_status }),
-      ]),
+  return eventbox(#{
+    class: "mail-box",
+    visible: has_mail,
+    cursor: "pointer",
+    hexpand: true,
+    tooltip: "click to open mutt",
+    onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
+  }, [
+    box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6,
+           hexpand: true }, [
+      label(#{ class: "mail-icon", text: icon_mail }),
+      label(#{ class: mail_class,  text: mail_status }),
     ]),
-    box(#{ hexpand: true }, []),
-    lock_btn(),
   ]);
 }
 
@@ -47,6 +43,14 @@ fn clock() {
       label(#{ class: "clock-day", text: day }),
       label(#{ class: "clock-mon", text: month }),
     ]),
+  ]);
+}
+
+// Clock centered, lock button floated into the top-right corner via overlay.
+fn header() {
+  return overlay(#{ hexpand: true }, [
+    clock(),
+    box(#{ halign: "end", valign: "start" }, [ lock_btn() ]),
   ]);
 }
 
@@ -196,16 +200,13 @@ fn temp_section() {
 // ---- BATTERY ----------------------------------------------------------------
 // Slim full-width battery row to match vol/bri. Hidden on hosts without a battery.
 fn battery_section() {
-  return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: has_battery != "false" && has_battery != "" }, [
-    box(#{ class: "ctl-row", tooltip: battery_stat, hexpand: true }, [
-      box(#{ orientation: "h", space_evenly: false, spacing: 6, hexpand: true, valign: "center" }, [
-        label(#{ class: "icon bat-icon", text: battery_icon }),
-        progress(#{ class: "ctl-bar ctl-bat", value: battery_pct, min: 0.0, max: 100.0,
-                    orientation: "h", height: 6, hexpand: true, valign: "center" }),
-        label(#{ class: "ctl-pct ctl-pct-val", text: battery_pct, xalign: 1.0 }),
-        label(#{ class: "ctl-pct", text: "%",         xalign: 0.0 }),
-      ]),
+  return box(#{ class: "ctl-row", visible: has_battery, tooltip: battery_stat, hexpand: true }, [
+    box(#{ orientation: "h", space_evenly: false, spacing: 6, hexpand: true, valign: "center" }, [
+      label(#{ class: "icon bat-icon", text: battery_icon }),
+      progress(#{ class: "ctl-bar ctl-bat", value: battery_pct, min: 0.0, max: 100.0,
+                  orientation: "h", height: 6, hexpand: true, valign: "center" }),
+      label(#{ class: "ctl-pct ctl-pct-val", text: battery_pct, xalign: 1.0 }),
+      label(#{ class: "ctl-pct", text: "%",         xalign: 0.0 }),
     ]),
   ]);
 }
@@ -314,10 +315,9 @@ fn vol() {
 
 // Slim full-width brightness row, mirroring vol(). Hidden on hosts with no backlight.
 fn bri() {
-  return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: has_backlight != "false" && has_backlight != "" }, [
-    eventbox(#{
+  return eventbox(#{
       class: "ctl-row",
+      visible: has_backlight,
       cursor: "pointer",
       hexpand: true,
       tooltip: "scroll to adjust brightness",
@@ -330,8 +330,7 @@ fn bri() {
         label(#{ class: "ctl-pct ctl-pct-val", text: brightness, xalign: 1.0 }),
         label(#{ class: "ctl-pct", text: "%", xalign: 0.0 }),
       ]),
-    ]),
-  ]);
+    ]);
 }
 
 fn wifi() {
@@ -413,7 +412,7 @@ fn lock_btn() {
 fn bar() {
   return box(#{ class: "bar", orientation: "v", space_evenly: false, spacing: 6,
                 hexpand: true, vexpand: true }, [
-    clock(),
+    header(),
     rule(),
     cpu_section(),
     rule(),
