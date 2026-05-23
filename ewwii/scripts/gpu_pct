@@ -1,8 +1,14 @@
 #!/bin/sh
-# gpu_pct — amdgpu busy-percent. Empty on hosts without an amdgpu sysfs.
+# gpu_pct — usage % for the first available GPU.
+# Supports amdgpu (gpu_busy_percent) and nvidia-smi.
 for f in /sys/class/drm/card*/device/gpu_busy_percent; do
   [ -r "$f" ] || continue
   cat "$f"
   exit 0
 done
+if command -v nvidia-smi >/dev/null 2>&1; then
+  nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null \
+    | head -1 | tr -d ' '
+  exit 0
+fi
 echo ""

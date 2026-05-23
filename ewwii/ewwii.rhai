@@ -468,9 +468,9 @@ tree([
   poll("has_backlight", #{ initial: "false", interval: "1h",
     cmd: "ls /sys/class/backlight 2>/dev/null | grep -q . && echo true || echo false" }),
 
-  // ---- host capability flag: AMD GPU sysfs --------------------------------
+  // ---- host capability flag: GPU stats available (amdgpu or nvidia-smi) --
   poll("has_gpu", #{ initial: "false", interval: "1h",
-    cmd: "ls /sys/class/drm/card*/device/gpu_busy_percent >/dev/null 2>&1 && echo true || echo false" }),
+    cmd: "{ ls /sys/class/drm/card*/device/gpu_busy_percent >/dev/null 2>&1 || command -v nvidia-smi >/dev/null 2>&1; } && echo true || echo false" }),
   poll("gpu_pct",        #{ initial: "0",   interval: "2s",
     cmd: "$HOME/.config/ewwii/scripts/gpu_pct" }),
   poll("gpu_vram_used",  #{ initial: "0G",  interval: "5s",

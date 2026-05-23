@@ -1,10 +1,12 @@
 #!/bin/sh
-# gpu_vram <used|total|pct> — video-memory stats for the first amdgpu card.
-# On iGPUs the dedicated VRAM is a tiny reserved slice; the real memory pool
-# is GTT (shared system RAM). We report whichever pool is larger, so:
-#   - discrete cards → VRAM (gtt_total ≪ vram_total)
-#   - integrated     → GTT  (gtt_total ≫ vram_total)
+# gpu_vram <used|total|pct> — video-memory stats for the first available GPU.
+# amdgpu: on iGPUs the dedicated VRAM is tiny; the real pool is GTT (shared
+# system RAM). Pick whichever pool is larger.
+#   - discrete amdgpu → VRAM
+#   - integrated      → GTT
+# nvidia: nvidia-smi memory.used / memory.total (MiB).
 field=${1:-used}
+
 for d in /sys/class/drm/card*/device; do
   [ -r "$d/mem_info_vram_used" ] || continue
   vu=$(cat "$d/mem_info_vram_used")
@@ -21,4 +23,17 @@ for d in /sys/class/drm/card*/device; do
   esac
   exit 0
 done
+
+if command -v nvidia-smi >/dev/null 2>&1; then
+  read used_mib total_mib <<EOF
+$(nvidia-smi --query-gpu=memory.used,memory.total --format=csv,noheader,nounits 2>/dev/null \
+    | head -1 | tr -d ' ' | tr ',' ' ')
+EOF
+  case "$field" in
+    used)  awk -v m="$used_mib"  'BEGIN{printf "%.1fG\n", m/1024}' ;;
+    total) awk -v m="$total_mib" 'BEGIN{printf "%.1fG\n", m/1024}' ;;
+    pct)   awk -v u="$used_mib" -v t="$total_mib" 'BEGIN{if(t>0) printf "%d\n", u*100/t; else print 0}' ;;
+  esac
+  exit 0
+fi
 echo 0
