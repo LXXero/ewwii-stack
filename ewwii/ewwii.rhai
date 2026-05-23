@@ -12,21 +12,25 @@ fn rule() {
 // Shows when this host has a maildir (mail_status non-empty) AND no battery.
 // On laptops the battery slot wins and mail stays hidden. Icon highlights via
 // .has-mail when the unread count (mail_count) > 0.
+// Mail icon+count on the left (hidden via `visible:` when no maildir);
+// lock button pinned to the far right of the same row.
 fn mail_section() {
-  return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: has_mail != "false" && has_mail != "" }, [
+  return box(#{ orientation: "h", space_evenly: false, hexpand: true, spacing: 6 }, [
     eventbox(#{
       class: "mail-box",
+      visible: has_mail,
       cursor: "pointer",
+      hexpand: true,
       tooltip: "click to open mutt",
       onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
     }, [
-      box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6,
-             hexpand: true }, [
+      box(#{ orientation: "h", space_evenly: false, halign: "start", spacing: 6 }, [
         label(#{ class: "mail-icon", text: icon_mail }),
         label(#{ class: mail_class,  text: mail_status }),
       ]),
     ]),
+    box(#{ hexpand: true }, []),
+    lock_btn(),
   ]);
 }
 
@@ -432,14 +436,10 @@ fn bar() {
     rule(),
     taskbar(),
     rule(),
-    /* Spacer fills remaining vertical space so the systray + bottom row of
-     * icons pin to the bottom of the (full-height) bar. */
+    /* Spacer fills remaining vertical space so the systray pins to the
+     * bottom of the (full-height) bar. */
     box(#{ vexpand: true }, []),
     tray_row(),
-    rule(),
-    box(#{ orientation: "h", space_evenly: false, spacing: 8, halign: "center", hexpand: true }, [
-      lock_btn()
-    ]),
   ]);
 }
 
