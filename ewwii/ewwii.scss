@@ -121,7 +121,10 @@ button.icon, button.icon label {
 .ctl-bat progress { background-color: $red; }
 .ctl-row       { padding: 1px 0; border-radius: 2px; }
 .ctl-row:hover { background-color: $bg-alt; }
-.ctl-pct       { color: $grey; font-size: 11px; min-width: 0; padding: 0; }
+.ctl-pct       { color: $grey; font-size: 11px; padding: 0; }
+// reserve 3 digits' worth on the numeric value so the bar width stays
+// constant from "0" → "100" — the "%" sign stays natural width
+.ctl-pct-val   { min-width: 22px; }
 .vol-icon, .vol-muted, .bri-icon, .bat-icon {
   font-size: 18px; padding: 0; min-width: 0; min-height: 0;
 }
