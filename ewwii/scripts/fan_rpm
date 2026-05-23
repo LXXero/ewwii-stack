@@ -1,7 +1,13 @@
 #!/bin/sh
-for h in /sys/class/hwmon/hwmon*; do
-  if [ "$(cat "$h/name" 2>/dev/null)" = "thinkpad" ]; then
-    cat "$h/fan1_input" 2>/dev/null && exit
-  fi
+# fan_rpm — sum of every fan tachometer the kernel exposes.
+# Works for any platform that publishes fan*_input via hwmon (thinkpad,
+# asus, nct67xx, it87, dell-smm, asusd, etc.). Returns 0 when nothing
+# is readable.
+total=0
+for f in /sys/class/hwmon/hwmon*/fan*_input; do
+  [ -r "$f" ] || continue
+  rpm=$(cat "$f" 2>/dev/null)
+  [ -z "$rpm" ] && continue
+  total=$((total + rpm))
 done
-echo 0
+echo "$total"
