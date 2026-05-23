@@ -52,7 +52,7 @@ Subscribes to `zwlr_foreign_toplevel_manager_v1`. Maintains a sorted (alphabetic
 
 3. **Taskbar debounce for new toplevels.** Brand-new toplevels are hidden from the bar for `TASKBAR_DEBOUNCE_MS = 1500`. Reason: flameshot creates a toplevel for its screen-capture overlay that lives for ~1s. Without debounce, the taskbar grows by a row, then shrinks, and the bar's layer surface gets reconfigured taller and never shrinks back. **Caveat**: when a real user-opened window appears, it shows in the taskbar 1.5s late.
 
-4. **Single-focus invariant.** When `on_state` sets a toplevel's `activated=1`, we explicitly clear `activated` on every other toplevel. Some compositors fire the activate event for the new window but forget to fire the deactivate for the old one. Without this, the bar would show two focused rows.
+4. **Single-focus invariant.** When `on_state` sets a toplevel's `activated=1`, we explicitly clear `activated` on every other toplevel. Some compositors fire the activate event for the new window but forget to fire the deactivate for the old one. The bar also runs one batched `task_focus_sync` update so stale per-slot focus polls cannot show two focused rows.
 
 5. **Slot reassignment ≠ field diff.** When sort order shifts (e.g. spinner-title rotation moves a window past its alphabetical neighbor), slot N now contains a DIFFERENT window. We detect `cur[i].id != prev_snap[i].id` and force-push ALL fields for that slot — otherwise the old window's focused class would carry over to the new occupant.
 
