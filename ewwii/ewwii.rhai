@@ -278,16 +278,22 @@ fn tray_menu_widget() {
   ]);
 }
 
+// Tray icons in rows of 4 so they wrap instead of widening the bar.
+// Empty slots collapse (visible:), so the 2nd row only appears with 5+ icons.
 fn tray_row() {
-  return box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6 }, [
-    tray_btn(1, tray_1_title, tray_1_icon, tray_1_exists),
-    tray_btn(2, tray_2_title, tray_2_icon, tray_2_exists),
-    tray_btn(3, tray_3_title, tray_3_icon, tray_3_exists),
-    tray_btn(4, tray_4_title, tray_4_icon, tray_4_exists),
-    tray_btn(5, tray_5_title, tray_5_icon, tray_5_exists),
-    tray_btn(6, tray_6_title, tray_6_icon, tray_6_exists),
-    tray_btn(7, tray_7_title, tray_7_icon, tray_7_exists),
-    tray_btn(8, tray_8_title, tray_8_icon, tray_8_exists),
+  return box(#{ orientation: "v", space_evenly: false, halign: "center", spacing: 6 }, [
+    box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6 }, [
+      tray_btn(1, tray_1_title, tray_1_icon, tray_1_exists),
+      tray_btn(2, tray_2_title, tray_2_icon, tray_2_exists),
+      tray_btn(3, tray_3_title, tray_3_icon, tray_3_exists),
+      tray_btn(4, tray_4_title, tray_4_icon, tray_4_exists),
+    ]),
+    box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6 }, [
+      tray_btn(5, tray_5_title, tray_5_icon, tray_5_exists),
+      tray_btn(6, tray_6_title, tray_6_icon, tray_6_exists),
+      tray_btn(7, tray_7_title, tray_7_icon, tray_7_exists),
+      tray_btn(8, tray_8_title, tray_8_icon, tray_8_exists),
+    ]),
   ]);
 }
 
