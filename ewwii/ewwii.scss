@@ -229,6 +229,12 @@ button.icon, button.icon label {
 
 .pwr-icon     { color: $red; }
 .pwr-lock     { color: $blue; }
+button.icon.pwr-lock, button.icon.pwr-lock label {
+  font-size: 18px;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+}
 .pwr-logout   { color: $yellow; }
 .pwr-reboot   { color: $magenta; }
 .pwr-shutdown { color: $red; }
