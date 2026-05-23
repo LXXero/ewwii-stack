@@ -284,16 +284,19 @@ fn vol() {
 }
 
 fn bri() {
-  return eventbox(#{
-    class: "icon bri-icon",
-    cursor: "pointer",
-    tooltip: "scroll to adjust brightness",
-    onscroll: "[ '{}' = 'up' ] && brightnessctl set 5%+ || brightnessctl set 5%-",
-  }, [
-    box(#{ orientation: "v", space_evenly: false, spacing: 1 }, [
-      label(#{ class: "icon bri-icon", text: icon_brightness }),
-      progress(#{ class: "ctl-bar ctl-bri", value: brightness, min: 0.0, max: 100.0,
-                  orientation: "h", width: 30, height: 3 }),
+  return revealer(#{ transition: "crossfade", duration: "150ms",
+                     reveal: has_backlight == "true" }, [
+    eventbox(#{
+      class: "icon bri-icon",
+      cursor: "pointer",
+      tooltip: "scroll to adjust brightness",
+      onscroll: "[ '{}' = 'up' ] && brightnessctl set 5%+ || brightnessctl set 5%-",
+    }, [
+      box(#{ orientation: "v", space_evenly: false, spacing: 1 }, [
+        label(#{ class: "icon bri-icon", text: icon_brightness }),
+        progress(#{ class: "ctl-bar ctl-bri", value: brightness, min: 0.0, max: 100.0,
+                    orientation: "h", width: 30, height: 3 }),
+      ]),
     ]),
   ]);
 }
@@ -433,6 +436,10 @@ tree([
   // ---- host capability flag: wireless interface present ------------------
   poll("has_wifi", #{ initial: "false", interval: "1h",
     cmd: "ls -d /sys/class/net/wl* >/dev/null 2>&1 && echo true || echo false" }),
+
+  // ---- host capability flag: controllable display backlight --------------
+  poll("has_backlight", #{ initial: "false", interval: "1h",
+    cmd: "ls /sys/class/backlight 2>/dev/null | grep -q . && echo true || echo false" }),
 
   // ---- monitors ------------------------------------------------------------
   poll("cpu_pct",   #{ initial: "0", interval: "2s", cmd: "$HOME/.config/ewwii/scripts/cpu_pct" }),
