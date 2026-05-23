@@ -37,7 +37,7 @@ $magenta:  #bb9af7;
 .clock-mon    { color: $grey; font-size: 14px; }
 
 // mail
-.mail-box   { padding: 0 4px; border-radius: 3px; }
+.mail-box   { padding: 0 4px; margin: -4px 0; border-radius: 3px; }
 .mail-icon  { color: $fg; font-size: 20px; padding: 0; min-height: 0; }
 .mail-count { color: $grey; font-size: 13px; }
 .mail-icon.has-mail  { color: $fg; }
