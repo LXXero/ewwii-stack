@@ -13,19 +13,24 @@ fn rule() {
 // On laptops the battery slot wins and mail stays hidden. Icon highlights via
 // .has-mail when the unread count (mail_count) > 0.
 // Centered mail icon+count; hidden via `visible:` when this host has no maildir.
+// Whole section (leading rule + mail row) collapses via visible: has_mail,
+// so hosts without a maildir don't get an orphaned rule pair / blank gap.
 fn mail_section() {
-  return eventbox(#{
-    class: "mail-box",
-    visible: has_mail,
-    cursor: "pointer",
-    hexpand: true,
-    tooltip: "click to open mutt",
-    onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
-  }, [
-    box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6,
-           hexpand: true }, [
-      label(#{ class: "mail-icon", text: icon_mail }),
-      label(#{ class: mail_class,  text: mail_status }),
+  return box(#{ orientation: "v", visible: has_mail, space_evenly: false,
+                spacing: 6, hexpand: true }, [
+    rule(),
+    eventbox(#{
+      class: "mail-box",
+      cursor: "pointer",
+      hexpand: true,
+      tooltip: "click to open mutt",
+      onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
+    }, [
+      box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6,
+             hexpand: true }, [
+        label(#{ class: "mail-icon", text: icon_mail }),
+        label(#{ class: mail_class,  text: mail_status }),
+      ]),
     ]),
   ]);
 }
@@ -430,7 +435,6 @@ fn bar() {
     net_section(),
     rule(),
     temp_section(),
-    rule(),
     mail_section(),
     rule(),
     battery_section(),
