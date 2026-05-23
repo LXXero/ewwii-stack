@@ -85,6 +85,32 @@ fn mem_section() {
   ]);
 }
 
+// ---- GPU --------------------------------------------------------------------
+// Hidden on hosts without an amdgpu sysfs (e.g. Intel/NVIDIA boxes).
+fn gpu_section() {
+  return revealer(#{ transition: "slidedown", duration: "150ms",
+                     reveal: has_gpu == "true" }, [
+    box(#{ orientation: "v", space_evenly: false, spacing: 6, hexpand: true }, [
+      box(#{ class: "rule", height: 1 }, []),
+      box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
+        box(#{ orientation: "h", space_evenly: false }, [
+          label(#{ class: "metric-label", text: "GPU",   xalign: 0.0, hexpand: true }),
+          label(#{ class: "metric-val",   text: gpu_pct, xalign: 1.0 }),
+          label(#{ class: "metric-val",   text: "%",     xalign: 0.0 }),
+        ]),
+        graph(#{ class: "g-gpu", value: gpu_pct, min: 0.0, max: 100.0,
+                 type: "fill", time_range: "60s", thickness: 1.0,
+                 width: 134, height: 28 }),
+        box(#{ orientation: "h", space_evenly: false }, [
+          label(#{ class: "metric-sub", text: gpu_vram_used,  xalign: 0.0, hexpand: true }),
+          label(#{ class: "metric-sub", text: "/",            xalign: 1.0 }),
+          label(#{ class: "metric-sub", text: gpu_vram_total, xalign: 1.0 }),
+        ]),
+      ]),
+    ]),
+  ]);
+}
+
 // ---- DISK -------------------------------------------------------------------
 fn disk_section() {
   return box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
@@ -118,7 +144,7 @@ fn net_section() {
   return box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
     box(#{ orientation: "h", space_evenly: false }, [
       label(#{ class: "metric-label", text: "NET", xalign: 0.0, hexpand: true }),
-      label(#{ class: "metric-sub", text: "wlan0", xalign: 1.0 }),
+      label(#{ class: "metric-sub", text: net_iface, xalign: 1.0 }),
     ]),
     box(#{ orientation: "h", space_evenly: false }, [
       label(#{ class: "metric-sub", text: "dn",   xalign: 0.0 }),
@@ -385,6 +411,7 @@ fn bar() {
     cpu_section(),
     rule(),
     mem_section(),
+    gpu_section(),
     rule(),
     disk_section(),
     rule(),
@@ -441,6 +468,16 @@ tree([
   poll("has_backlight", #{ initial: "false", interval: "1h",
     cmd: "ls /sys/class/backlight 2>/dev/null | grep -q . && echo true || echo false" }),
 
+  // ---- host capability flag: AMD GPU sysfs --------------------------------
+  poll("has_gpu", #{ initial: "false", interval: "1h",
+    cmd: "ls /sys/class/drm/card*/device/gpu_busy_percent >/dev/null 2>&1 && echo true || echo false" }),
+  poll("gpu_pct",        #{ initial: "0",   interval: "2s",
+    cmd: "$HOME/.config/ewwii/scripts/gpu_pct" }),
+  poll("gpu_vram_used",  #{ initial: "0G",  interval: "5s",
+    cmd: "$HOME/.config/ewwii/scripts/gpu_vram used" }),
+  poll("gpu_vram_total", #{ initial: "0G",  interval: "1h",
+    cmd: "$HOME/.config/ewwii/scripts/gpu_vram total" }),
+
   // ---- monitors ------------------------------------------------------------
   poll("cpu_pct",   #{ initial: "0", interval: "2s", cmd: "$HOME/.config/ewwii/scripts/cpu_pct" }),
   poll("cpu_freq",  #{ initial: "0", interval: "5s",
@@ -465,6 +502,7 @@ tree([
 
   poll("net_dn",    #{ initial: "0", interval: "1s", cmd: "$HOME/.config/ewwii/scripts/net_io rx" }),
   poll("net_up",    #{ initial: "0", interval: "1s", cmd: "$HOME/.config/ewwii/scripts/net_io tx" }),
+  poll("net_iface", #{ initial: "-", interval: "5s", cmd: "$HOME/.config/ewwii/scripts/net_iface" }),
 
   // ---- top processes -------------------------------------------------------
   poll("top_cpu_n1", #{ initial: "-", interval: "3s", cmd: "$HOME/.config/ewwii/scripts/top_name cpu 1" }),

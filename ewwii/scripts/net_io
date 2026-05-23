@@ -1,7 +1,9 @@
 #!/bin/sh
 # net IO in KB/s; arg: "rx" or "tx"
-IF=wlan0
-STATE=/tmp/ewwii_net_$1
+# Picks the iface holding the default route. Override with NET_IFACE=...
+IF=${NET_IFACE:-$(awk '$2=="00000000"{print $1; exit}' /proc/net/route)}
+[ -z "$IF" ] && { echo 0; exit; }
+STATE=/tmp/ewwii_net_${IF}_$1
 F=/sys/class/net/$IF/statistics/${1}_bytes
 [ -r "$F" ] || { echo 0; exit; }
 now=$(cat "$F")

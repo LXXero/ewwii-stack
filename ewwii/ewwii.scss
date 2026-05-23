@@ -57,6 +57,7 @@ graph {
 }
 .g-cpu     { color: $green; }
 .g-mem     { color: $magenta; }
+.g-gpu     { color: $red; }
 .g-disk-rd { color: $cyan; }
 .g-disk-wr { color: $yellow; }
 .g-net-dn  { color: $cyan; }

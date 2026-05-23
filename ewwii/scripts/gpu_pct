@@ -1,0 +1,8 @@
+#!/bin/sh
+# gpu_pct — amdgpu busy-percent. Empty on hosts without an amdgpu sysfs.
+for f in /sys/class/drm/card*/device/gpu_busy_percent; do
+  [ -r "$f" ] || continue
+  cat "$f"
+  exit 0
+done
+echo ""

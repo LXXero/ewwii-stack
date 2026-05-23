@@ -1,0 +1,24 @@
+#!/bin/sh
+# gpu_vram <used|total|pct> — video-memory stats for the first amdgpu card.
+# On iGPUs the dedicated VRAM is a tiny reserved slice; the real memory pool
+# is GTT (shared system RAM). We report whichever pool is larger, so:
+#   - discrete cards → VRAM (gtt_total ≪ vram_total)
+#   - integrated     → GTT  (gtt_total ≫ vram_total)
+field=${1:-used}
+for d in /sys/class/drm/card*/device; do
+  [ -r "$d/mem_info_vram_used" ] || continue
+  vu=$(cat "$d/mem_info_vram_used")
+  vt=$(cat "$d/mem_info_vram_total")
+  gu=$(cat "$d/mem_info_gtt_used"  2>/dev/null || echo 0)
+  gt=$(cat "$d/mem_info_gtt_total" 2>/dev/null || echo 0)
+  if [ "$gt" -gt "$vt" ]; then used=$gu; total=$gt
+  else                          used=$vu; total=$vt
+  fi
+  case "$field" in
+    used)  awk -v b="$used"  'BEGIN{printf "%.1fG\n", b/1073741824}' ;;
+    total) awk -v b="$total" 'BEGIN{printf "%.1fG\n", b/1073741824}' ;;
+    pct)   awk -v u="$used" -v t="$total" 'BEGIN{if(t>0) printf "%d\n", u*100/t; else print 0}' ;;
+  esac
+  exit 0
+done
+echo 0
