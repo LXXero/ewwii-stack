@@ -7,5 +7,6 @@ case "$1" in
   shutdown)    printf '\xef\x80\x91\n' ;;   # U+F011
   power)       printf '\xef\x80\x91\n' ;;   # U+F011
   brightness)  printf '\xef\x86\x85\n' ;;   # U+F185
+  mail)        printf '\xef\x83\xa0\n' ;;   # U+F0E0
   *) ;;
 esac

@@ -1,6 +1,35 @@
 #!/bin/sh
-# tray_activate <rank>     left-click → Default activate on the Nth tray
+# tray_activate <rank>     left-click → restore/raise the Nth tray app.
+#
+# Many Wayland apps don't actually unhide on SNI Activate. Three fallbacks:
+#   1. SNI Activate (the spec-correct first try; works for well-behaved apps)
+#   2. MPRIS Raise on org.mpris.MediaPlayer2.<title> (fixes Spotify)
+#   3. Click the menu entry with a "Show/Open/Restore" label (fixes Electron
+#      apps like Discord & Signal that only honor their tray menu)
+
 N=$1
-id=$(sed -n "${N}p" /tmp/ewwii_tray.list 2>/dev/null | cut -f1)
-[ -z "$id" ] && exit 0
-exec $HOME/.local/bin/wlr-tray activate "$id"
+line=$(sed -n "${N}p" /tmp/ewwii_tray.list 2>/dev/null)
+[ -z "$line" ] && exit 0
+id=$(printf '%s\n' "$line" | cut -f1)
+title=$(printf '%s\n' "$line" | cut -f2)
+
+# 1) SNI Activate
+$HOME/.local/bin/wlr-tray activate "$id"
+
+# 2) MPRIS Raise (silent no-op for non-MPRIS items)
+if [ -n "$title" ]; then
+  bus="org.mpris.MediaPlayer2.$(printf '%s' "$title" | tr '[:upper:]' '[:lower:]')"
+  dbus-send --dest="$bus" /org/mpris/MediaPlayer2 \
+    org.mpris.MediaPlayer2.Raise >/dev/null 2>&1
+fi
+
+# 3) Tray-menu fallback: dispatch the first menu item whose label looks like
+#    a restore action. Matches "Show", "Show App", "Open <X>", "Open Window",
+#    "Restore", "Bring to Front" etc.
+menu_id=$($HOME/.local/bin/wlr-tray menu "$id" 2>/dev/null \
+  | jq -r '.[] | select(.visible and .enabled and (.label
+      | test("^(Show|Open|Restore|Bring|Activate)( |$)"; "i"))) | .id' \
+  | head -1)
+if [ -n "$menu_id" ]; then
+  $HOME/.local/bin/wlr-tray menu-click "$id" "$menu_id" >/dev/null 2>&1
+fi

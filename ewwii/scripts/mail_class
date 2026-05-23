@@ -1,0 +1,11 @@
+#!/bin/sh
+# mail_class — emits the CSS class suffix for the mail widget based on whether
+# there are unread messages. Use as `class: mail_class` in ewwii.rhai.
+DIR="${MAIL_DIR:-$HOME/.maildir}"
+[ -d "$DIR/new" ] || { echo "mail-count"; exit 0; }
+new=$(find "$DIR/new" -maxdepth 1 -type f 2>/dev/null | wc -l)
+if [ "$new" -gt 0 ]; then
+  echo "mail-count has-mail"
+else
+  echo "mail-count"
+fi

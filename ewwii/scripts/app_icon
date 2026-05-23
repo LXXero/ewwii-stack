@@ -39,6 +39,21 @@ if [ -z "$desktop" ]; then
     [ -n "$found" ] && { desktop=$found; break; }
   done
 fi
+# Pass D: match by StartupWMClass / Exec. Some apps (e.g. Claude Desktop) ship
+# a .desktop file whose filename doesn't match the wlroots app_id; the WMClass
+# is the authoritative key. Try the full app_id plus a few sensible reductions.
+if [ -z "$desktop" ]; then
+  short=${APP_ID##*.}            # com.anthropic.claude-desktop -> claude-desktop
+  shorter=${short%-desktop}      # claude-desktop -> claude
+  for dir in $DIRS; do
+    [ -d "$dir" ] || continue
+    for pat in "$APP_ID" "$short" "$shorter"; do
+      [ -z "$pat" ] && continue
+      found=$(grep -lFi "StartupWMClass=$pat" "$dir"/*.desktop 2>/dev/null | head -1)
+      [ -n "$found" ] && { desktop=$found; break 2; }
+    done
+  done
+fi
 [ -z "$desktop" ] && { : > "$CACHED"; exit 0; }
 
 icon=$(awk -F= 'tolower($1)=="icon"{print $2; exit}' "$desktop")

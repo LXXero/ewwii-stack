@@ -8,6 +8,28 @@ fn rule() {
   return box(#{ class: "rule", height: 1 }, []);
 }
 
+// ---- mail -------------------------------------------------------------------
+// Shows when this host has a maildir (mail_status non-empty) AND no battery.
+// On laptops the battery slot wins and mail stays hidden. Icon highlights via
+// .has-mail when the unread count (mail_count) > 0.
+fn mail_section() {
+  return revealer(#{ transition: "slidedown", duration: "150ms",
+                     reveal: mail_status != "" && has_battery != "true" }, [
+    eventbox(#{
+      class: "mail-box",
+      cursor: "pointer",
+      tooltip: "click to open mutt",
+      onclick: "setsid -f xfce4-terminal -x mutt >/dev/null 2>&1",
+    }, [
+      box(#{ orientation: "h", space_evenly: false, halign: "center", spacing: 6,
+             hexpand: true }, [
+        label(#{ class: "mail-icon", text: icon_mail }),
+        label(#{ class: mail_class,  text: mail_status }),
+      ]),
+    ]),
+  ]);
+}
+
 // ---- clock ------------------------------------------------------------------
 fn clock() {
   return box(#{ orientation: "v", class: "clock", space_evenly: false, spacing: 2,
@@ -142,19 +164,23 @@ fn temp_section() {
 }
 
 // ---- BATTERY ----------------------------------------------------------------
+// Hidden on hosts without a battery (desktop); mail_section() fills the slot.
 fn battery_section() {
-  return box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
-    box(#{ orientation: "h", space_evenly: false }, [
-      label(#{ class: "metric-label", text: "BAT", xalign: 0.0, hexpand: true }),
-      label(#{ class: "icon bat-icon", text: battery_icon, xalign: 1.0 }),
-      label(#{ class: "metric-val", text: battery_pct, xalign: 1.0 }),
-      label(#{ class: "metric-val", text: "%",         xalign: 0.0 }),
-    ]),
-    progress(#{ class: "bat-bar", value: battery_pct, min: 0.0, max: 100.0,
-                orientation: "h", width: 134, height: 5 }),
-    box(#{ orientation: "h", space_evenly: false }, [
-      label(#{ class: "metric-sub", text: battery_stat, xalign: 0.0, hexpand: true }),
-      label(#{ class: "metric-sub", text: battery_time, xalign: 1.0 }),
+  return revealer(#{ transition: "slidedown", duration: "150ms",
+                     reveal: has_battery == "true" }, [
+    box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
+      box(#{ orientation: "h", space_evenly: false }, [
+        label(#{ class: "metric-label", text: "BAT", xalign: 0.0, hexpand: true }),
+        label(#{ class: "icon bat-icon", text: battery_icon, xalign: 1.0 }),
+        label(#{ class: "metric-val", text: battery_pct, xalign: 1.0 }),
+        label(#{ class: "metric-val", text: "%",         xalign: 0.0 }),
+      ]),
+      progress(#{ class: "bat-bar", value: battery_pct, min: 0.0, max: 100.0,
+                  orientation: "h", width: 134, height: 5 }),
+      box(#{ orientation: "h", space_evenly: false }, [
+        label(#{ class: "metric-sub", text: battery_stat, xalign: 0.0, hexpand: true }),
+        label(#{ class: "metric-sub", text: battery_time, xalign: 1.0 }),
+      ]),
     ]),
   ]);
 }
@@ -190,8 +216,10 @@ fn tray_btn(n, title, icon_path, exists) {
     onmiddleclick: "$HOME/.config/ewwii/scripts/tray_secondary " + n,
     onrightclick:  "$HOME/.config/ewwii/scripts/tray_menu_open " + n,
   }, [
-    image(#{ path: icon_path, image_width: 13, image_height: 13,
-             preserve_aspect_ratio: true }),
+    box(#{ orientation: "h", space_evenly: false }, [
+      image(#{ path: icon_path, image_width: 13, image_height: 13,
+               preserve_aspect_ratio: true }),
+    ]),
   ]);
 }
 
@@ -359,6 +387,7 @@ fn bar() {
     temp_section(),
     rule(),
     battery_section(),
+    mail_section(),
     rule(),
     top_section(),
     rule(),
@@ -381,6 +410,22 @@ tree([
   poll("minute", #{ initial: "00", interval: "10s", cmd: "date '+%M'" }),
   poll("day",    #{ initial: "01", interval: "10m", cmd: "date '+%d'" }),
   poll("month",  #{ initial: "??", interval: "10m", cmd: "date '+%b'" }),
+
+  // ---- mail (hidden when maildir absent) -----------------------------------
+  // mail_status is the pre-formatted "<new>/<total>" string shown in the bar.
+  // mail_count is just <new> and is used to toggle the .has-mail highlight.
+  poll("mail_count",  #{ initial: "0", interval: "5s",
+    cmd: "$HOME/.config/ewwii/scripts/mail_count" }),
+  poll("mail_status", #{ initial: "", interval: "5s",
+    cmd: "$HOME/.config/ewwii/scripts/mail_status" }),
+  poll("icon_mail",   #{ initial: "", interval: "1h",
+    cmd: "$HOME/.config/ewwii/scripts/static_icon mail" }),
+  poll("mail_class",  #{ initial: "mail-count", interval: "5s",
+    cmd: "$HOME/.config/ewwii/scripts/mail_class" }),
+
+  // ---- host capability flag: battery presence -----------------------------
+  poll("has_battery", #{ initial: "false", interval: "1h",
+    cmd: "ls /sys/class/power_supply/BAT* >/dev/null 2>&1 && echo true || echo false" }),
 
   // ---- monitors ------------------------------------------------------------
   poll("cpu_pct",   #{ initial: "0", interval: "2s", cmd: "$HOME/.config/ewwii/scripts/cpu_pct" }),

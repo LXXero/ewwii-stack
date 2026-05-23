@@ -36,6 +36,13 @@ $magenta:  #bb9af7;
 .clock-day    { color: $fg;   font-size: 14px; }
 .clock-mon    { color: $grey; font-size: 14px; }
 
+// mail
+.mail-box   { padding: 4px 4px; border-radius: 3px; }
+.mail-icon  { color: $fg; font-size: 22px; }
+.mail-count { color: $grey; font-size: 13px; }
+.mail-icon.has-mail  { color: $fg; }
+.mail-count.has-mail { color: $yellow; font-weight: bold; }
+
 // metric labels
 .metric-label   { color: $blue;   font-weight: bold; font-size: 12px; }
 .metric-val     { color: $green;  font-size: 12px; }
