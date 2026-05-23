@@ -89,7 +89,7 @@ fn mem_section() {
 // Hidden on hosts without an amdgpu sysfs (e.g. Intel/NVIDIA boxes).
 fn gpu_section() {
   return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: has_gpu == "true" }, [
+                     reveal: has_gpu != "false" }, [
     box(#{ orientation: "v", space_evenly: false, spacing: 6, hexpand: true }, [
       box(#{ class: "rule", height: 1 }, []),
       box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
@@ -190,22 +190,17 @@ fn temp_section() {
 }
 
 // ---- BATTERY ----------------------------------------------------------------
-// Hidden on hosts without a battery (desktop); mail_section() fills the slot.
+// Slim full-width battery row to match vol/bri. Hidden on hosts without a battery.
 fn battery_section() {
   return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: has_battery == "true" }, [
-    box(#{ orientation: "v", space_evenly: false, spacing: 2, hexpand: true }, [
-      box(#{ orientation: "h", space_evenly: false }, [
-        label(#{ class: "metric-label", text: "BAT", xalign: 0.0, hexpand: true }),
-        label(#{ class: "icon bat-icon", text: battery_icon, xalign: 1.0 }),
-        label(#{ class: "metric-val", text: battery_pct, xalign: 1.0 }),
-        label(#{ class: "metric-val", text: "%",         xalign: 0.0 }),
-      ]),
-      progress(#{ class: "bat-bar", value: battery_pct, min: 0.0, max: 100.0,
-                  orientation: "h", width: 134, height: 5 }),
-      box(#{ orientation: "h", space_evenly: false }, [
-        label(#{ class: "metric-sub", text: battery_stat, xalign: 0.0, hexpand: true }),
-        label(#{ class: "metric-sub", text: battery_time, xalign: 1.0 }),
+                     reveal: has_battery != "false" && has_battery != "" }, [
+    box(#{ class: "ctl-row", tooltip: battery_stat, hexpand: true }, [
+      box(#{ orientation: "h", space_evenly: false, spacing: 6, hexpand: true, valign: "center" }, [
+        label(#{ class: "icon bat-icon", text: battery_icon }),
+        progress(#{ class: "ctl-bar ctl-bat", value: battery_pct, min: 0.0, max: 100.0,
+                    orientation: "h", height: 6, hexpand: true, valign: "center" }),
+        label(#{ class: "ctl-pct", text: battery_pct, xalign: 1.0 }),
+        label(#{ class: "ctl-pct", text: "%",         xalign: 0.0 }),
       ]),
     ]),
   ]);
@@ -291,37 +286,45 @@ fn tray_row() {
   ]);
 }
 
+// Slim full-width volume row: [icon] [=====bar=====] XX%
 fn vol() {
   let icon_class = if muted == "true" { "icon vol-muted" } else { "icon vol-icon" };
   return eventbox(#{
-    class: icon_class,
+    class: "ctl-row",
     cursor: "pointer",
+    hexpand: true,
     tooltip: "scroll to adjust · click to mute · right-click for mixer",
     onclick:  "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
     onrightclick: "setsid -f pavucontrol >/dev/null 2>&1",
     onscroll: "[ '{}' = 'up' ] && wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ || wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
   }, [
-    box(#{ orientation: "v", space_evenly: false, spacing: 1 }, [
+    box(#{ orientation: "h", space_evenly: false, spacing: 6, hexpand: true, valign: "center" }, [
       label(#{ class: icon_class, text: volume_icon }),
       progress(#{ class: "ctl-bar ctl-vol", value: volume, min: 0.0, max: 100.0,
-                  orientation: "h", width: 30, height: 3 }),
+                  orientation: "h", height: 6, hexpand: true, valign: "center" }),
+      label(#{ class: "ctl-pct", text: volume, xalign: 1.0 }),
+      label(#{ class: "ctl-pct", text: "%", xalign: 0.0 }),
     ]),
   ]);
 }
 
+// Slim full-width brightness row, mirroring vol(). Hidden on hosts with no backlight.
 fn bri() {
-  return revealer(#{ transition: "crossfade", duration: "150ms",
-                     reveal: has_backlight == "true" }, [
+  return revealer(#{ transition: "slidedown", duration: "150ms",
+                     reveal: has_backlight != "false" && has_backlight != "" }, [
     eventbox(#{
-      class: "icon bri-icon",
+      class: "ctl-row",
       cursor: "pointer",
+      hexpand: true,
       tooltip: "scroll to adjust brightness",
       onscroll: "[ '{}' = 'up' ] && brightnessctl set 5%+ || brightnessctl set 5%-",
     }, [
-      box(#{ orientation: "v", space_evenly: false, spacing: 1 }, [
+      box(#{ orientation: "h", space_evenly: false, spacing: 6, hexpand: true, valign: "center" }, [
         label(#{ class: "icon bri-icon", text: icon_brightness }),
         progress(#{ class: "ctl-bar ctl-bri", value: brightness, min: 0.0, max: 100.0,
-                    orientation: "h", width: 30, height: 3 }),
+                    orientation: "h", height: 6, hexpand: true, valign: "center" }),
+        label(#{ class: "ctl-pct", text: brightness, xalign: 1.0 }),
+        label(#{ class: "ctl-pct", text: "%", xalign: 0.0 }),
       ]),
     ]),
   ]);
@@ -330,7 +333,7 @@ fn bri() {
 fn wifi() {
   let tip = if wifi_ssid != "" { wifi_ssid } else { "disconnected" };
   return revealer(#{ transition: "crossfade", duration: "150ms",
-                     reveal: has_wifi == "true" }, [
+                     reveal: has_wifi != "false" }, [
     box(#{ orientation: "v", tooltip: tip }, [
       button(#{ class: "icon wifi-icon", onclick: "nm-connection-editor &", label: wifi_icon }),
     ]),
@@ -419,8 +422,11 @@ fn bar() {
     rule(),
     temp_section(),
     rule(),
-    battery_section(),
     mail_section(),
+    rule(),
+    battery_section(),
+    vol(),
+    bri(),
     rule(),
     top_section(),
     rule(),
@@ -431,8 +437,8 @@ fn bar() {
     box(#{ vexpand: true }, []),
     tray_row(),
     rule(),
-    box(#{ orientation: "h", space_evenly: true, halign: "fill", hexpand: true }, [
-      vol(), bri(), wifi(), lock_btn()
+    box(#{ orientation: "h", space_evenly: false, spacing: 8, halign: "center", hexpand: true }, [
+      lock_btn()
     ]),
   ]);
 }

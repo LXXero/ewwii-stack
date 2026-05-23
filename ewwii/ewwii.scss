@@ -109,15 +109,22 @@ button.icon, button.icon label {
 }
 .icon:hover, .icon:hover * { color: $blue; }
 
-// thin level bar under volume/brightness icons
+// slim level bar used in the full-width volume + brightness rows
 .ctl-bar {
-  min-width: 30px; min-height: 3px;
-  trough    { min-width: 30px; min-height: 3px; background-color: $bg-alt;
-              border-radius: 1px; }
-  progress  { min-height: 3px; border-radius: 1px; }
+  min-height: 6px;
+  margin: 0;
+  trough    { min-height: 6px; background-color: $bg-alt; border-radius: 2px; }
+  progress  { min-height: 6px; border-radius: 2px; }
 }
 .ctl-vol progress { background-color: $green; }
 .ctl-bri progress { background-color: $yellow; }
+.ctl-bat progress { background-color: $red; }
+.ctl-row       { padding: 1px 0; border-radius: 2px; }
+.ctl-row:hover { background-color: $bg-alt; }
+.ctl-pct       { color: $grey; font-size: 11px; min-width: 18px; }
+.vol-icon, .vol-muted, .bri-icon, .bat-icon {
+  font-size: 18px; padding: 0; min-width: 0; min-height: 0;
+}
 
 .vol-icon  { color: $green; }
 .vol-muted { color: $red; }
@@ -218,7 +225,7 @@ button.icon, button.icon label {
   font-size: 11px;
 }
 
-.bat-icon { color: $green; font-size: 14px; padding: 0; min-width: 0; min-height: 0; }
+.bat-icon { color: $red; }
 
 .pwr-icon     { color: $red; }
 .pwr-lock     { color: $blue; }
