@@ -121,7 +121,7 @@ button.icon, button.icon label {
 .ctl-bat progress { background-color: $red; }
 .ctl-row       { padding: 1px 0; border-radius: 2px; }
 .ctl-row:hover { background-color: $bg-alt; }
-.ctl-pct       { color: $grey; font-size: 11px; min-width: 18px; }
+.ctl-pct       { color: $grey; font-size: 11px; min-width: 0; padding: 0; }
 .vol-icon, .vol-muted, .bri-icon, .bat-icon {
   font-size: 18px; padding: 0; min-width: 0; min-height: 0;
 }

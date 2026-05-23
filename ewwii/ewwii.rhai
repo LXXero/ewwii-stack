@@ -14,7 +14,7 @@ fn rule() {
 // .has-mail when the unread count (mail_count) > 0.
 fn mail_section() {
   return revealer(#{ transition: "slidedown", duration: "150ms",
-                     reveal: mail_status != "" && has_battery != "true" }, [
+                     reveal: has_mail != "false" && has_mail != "" }, [
     eventbox(#{
       class: "mail-box",
       cursor: "pointer",
@@ -465,6 +465,10 @@ tree([
   // ---- host capability flag: battery presence -----------------------------
   poll("has_battery", #{ initial: "false", interval: "1h",
     cmd: "ls /sys/class/power_supply/BAT* >/dev/null 2>&1 && echo true || echo false" }),
+
+  // ---- host capability flag: maildir present (hides mail widget elsewhere) -
+  poll("has_mail", #{ initial: "false", interval: "1h",
+    cmd: "[ -d $HOME/.maildir/new ] && echo true || echo false" }),
 
   // ---- host capability flag: wireless interface present ------------------
   poll("has_wifi", #{ initial: "false", interval: "1h",
