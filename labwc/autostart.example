@@ -5,5 +5,10 @@
 ~/.local/bin/wlr-taskd >/dev/null 2>&1 &
 ~/.local/bin/wlr-trayd >/dev/null 2>&1 &
 
+# Raise the open-file limit: ewwii holds ~1 fd per poll variable (~280),
+# and transient spikes (apps launching, tray/icon loads) can otherwise blow
+# past the default 1024 soft limit and starve polls — symptom is blank
+# widgets (missing volume bar, tray icons) at boot until a reload.
+ulimit -n 8192
 ewwii daemon >/dev/null 2>&1 &
 sleep 1 && ewwii open bar &

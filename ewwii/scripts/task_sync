@@ -1,0 +1,57 @@
+#!/bin/sh
+# Atomically refresh ALL taskbar slot fields (exists/title/icon/focused) for
+# every slot in one `ewwii update` call. Replaces 128 individual per-slot
+# polls (win_N_{title,icon,exists,focused}) with a single batched poll, which
+# slashes open-fd count and fork/exec churn.
+#
+# Cache lines (TAB-separated): id<TAB>app_id<TAB>title<TAB>state
+SLOTS=32
+ICON=$HOME/.config/ewwii/scripts/app_icon
+
+list=$("$HOME/.local/bin/wlr-task" list 2>/dev/null)
+[ -z "$list" ] && list=$(cat /tmp/ewwii_wlrctl.list 2>/dev/null)
+
+mappings=
+add() {  # add <key> <value>
+  esc=$(printf '%s' "$2" | sed 's/\\/\\\\/g; s/"/\\"/g')
+  entry="$1=\"$esc\""
+  if [ -n "$mappings" ]; then mappings="$mappings,$entry"; else mappings="$entry"; fi
+}
+
+i=1
+while [ "$i" -le "$SLOTS" ]; do
+  line=$(printf '%s\n' "$list" | sed -n "${i}p")
+  if [ -z "$line" ]; then
+    add "win_${i}_exists"  "false"
+    add "win_${i}_title"   ""
+    add "win_${i}_icon"    ""
+    add "win_${i}_focused" "tb-item"
+    i=$((i + 1)); continue
+  fi
+
+  app_id=$(printf '%s\n' "$line" | cut -f2)
+  title=$(printf '%s\n'  "$line" | cut -f3)
+  state=$(printf '%s\n'  "$line" | cut -f4)
+
+  # truncate long titles to keep the bar narrow
+  case "$title" in
+    ????????????????*) title=$(printf '%s' "$title" | cut -c1-14).. ;;
+  esac
+
+  case "$state" in
+    F) klass="tb-item tb-focused" ;;
+    M) klass="tb-item tb-minimized" ;;
+    *) klass="tb-item" ;;
+  esac
+
+  icon=$("$ICON" "$app_id" 2>/dev/null)
+
+  add "win_${i}_exists"  "true"
+  add "win_${i}_title"   "$title"
+  add "win_${i}_icon"    "$icon"
+  add "win_${i}_focused" "$klass"
+  i=$((i + 1))
+done
+
+ewwii update "$mappings" >/dev/null 2>&1 || true
+echo ok

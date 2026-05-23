@@ -1,0 +1,38 @@
+#!/bin/sh
+# Refresh the tray list AND atomically push every slot's exists/title/icon to
+# ewwii in one `ewwii update`. Replaces the per-slot tray polls so adding or
+# removing a tray item can't leave a stale/blank slot (slot reassignment is
+# atomic, not a race between independent polls).
+#
+# Tray list lines (TAB-separated): id<TAB>title<TAB>icon_path<TAB>has_menu
+SLOTS=8
+
+# refresh cache (same as the old tray_refresh poll)
+"$HOME/.local/bin/wlr-tray" list > /tmp/ewwii_tray.list.tmp 2>/dev/null \
+  && mv -f /tmp/ewwii_tray.list.tmp /tmp/ewwii_tray.list
+list=$(cat /tmp/ewwii_tray.list 2>/dev/null)
+
+mappings=
+add() {
+  esc=$(printf '%s' "$2" | sed 's/\\/\\\\/g; s/"/\\"/g')
+  entry="$1=\"$esc\""
+  if [ -n "$mappings" ]; then mappings="$mappings,$entry"; else mappings="$entry"; fi
+}
+
+i=1
+while [ "$i" -le "$SLOTS" ]; do
+  line=$(printf '%s\n' "$list" | sed -n "${i}p")
+  if [ -z "$line" ]; then
+    add "tray_${i}_exists" "false"
+    add "tray_${i}_title"  ""
+    add "tray_${i}_icon"   ""
+  else
+    add "tray_${i}_exists" "true"
+    add "tray_${i}_title"  "$(printf '%s\n' "$line" | cut -f2)"
+    add "tray_${i}_icon"   "$(printf '%s\n' "$line" | cut -f3)"
+  fi
+  i=$((i + 1))
+done
+
+ewwii update "$mappings" >/dev/null 2>&1 || true
+echo ok
