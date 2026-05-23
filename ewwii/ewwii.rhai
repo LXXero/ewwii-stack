@@ -300,8 +300,11 @@ fn bri() {
 
 fn wifi() {
   let tip = if wifi_ssid != "" { wifi_ssid } else { "disconnected" };
-  return box(#{ orientation: "v", tooltip: tip }, [
-    button(#{ class: "icon wifi-icon", onclick: "nm-connection-editor &", label: wifi_icon }),
+  return revealer(#{ transition: "crossfade", duration: "150ms",
+                     reveal: has_wifi == "true" }, [
+    box(#{ orientation: "v", tooltip: tip }, [
+      button(#{ class: "icon wifi-icon", onclick: "nm-connection-editor &", label: wifi_icon }),
+    ]),
   ]);
 }
 
@@ -426,6 +429,10 @@ tree([
   // ---- host capability flag: battery presence -----------------------------
   poll("has_battery", #{ initial: "false", interval: "1h",
     cmd: "ls /sys/class/power_supply/BAT* >/dev/null 2>&1 && echo true || echo false" }),
+
+  // ---- host capability flag: wireless interface present ------------------
+  poll("has_wifi", #{ initial: "false", interval: "1h",
+    cmd: "ls -d /sys/class/net/wl* >/dev/null 2>&1 && echo true || echo false" }),
 
   // ---- monitors ------------------------------------------------------------
   poll("cpu_pct",   #{ initial: "0", interval: "2s", cmd: "$HOME/.config/ewwii/scripts/cpu_pct" }),
